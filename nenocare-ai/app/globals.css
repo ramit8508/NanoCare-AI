@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --background: 222 47% 6%;
+  --foreground: 210 40% 96%;
+  --card: 222 40% 10%;
+  --card-foreground: 210 40% 96%;
+  --primary: 199 100% 57%;
+  --primary-foreground: 222 47% 6%;
+  --muted: 222 22% 16%;
+  --muted-foreground: 215 20% 70%;
+  --border: 222 24% 18%;
+  --ring: 199 100% 57%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: radial-gradient(circle at top, rgba(14, 116, 144, 0.18), transparent 35%),
+    radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.16), transparent 40%),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+}
+
+.glass {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.5);
+}
+
+.card-lift {
+  transform-style: preserve-3d;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 50px rgba(14, 116, 144, 0.22);
+}
+
+.skeleton-loader {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.skeleton-loader::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(56, 189, 248, 0.15), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-body {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  gap: 12px;
+  color: rgba(148, 163, 184, 0.6);
+}
+
+.skeleton-bone {
+  width: 80%;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.skeleton-bone.short {
+  width: 40%;
+}
+
+.skeleton-bone.medium {
+  width: 60%;
+}
+
+.signature {
+  font-family: var(--font-serif), serif;
+  letter-spacing: 0.06em;
+}

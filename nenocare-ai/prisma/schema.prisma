@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGO_URL")
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum SlotStatus {
+  AVAILABLE
+  BOOKED
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+model User {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  email         String         @unique
+  passwordHash  String?
+  role          Role           @default(PATIENT)
+  isBlacklisted Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  doctorProfile DoctorProfile?
+  patientProfile PatientProfile?
+  prescriptionsAsDoctor  ExercisePrescription[] @relation("DoctorPrescriptions")
+  prescriptionsAsPatient ExercisePrescription[] @relation("PatientPrescriptions")
+  sessionRecordsAsDoctor  ExerciseSessionRecord[] @relation("DoctorSessionRecords")
+  sessionRecordsAsPatient ExerciseSessionRecord[] @relation("PatientSessionRecords")
+  slotsAsDoctor           DoctorSlot[]           @relation("DoctorSlots")
+  appointmentsAsDoctor    Appointment[]          @relation("DoctorAppointments")
+  appointmentsAsPatient   Appointment[]          @relation("PatientAppointments")
+}
+
+model DoctorProfile {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @unique @db.ObjectId
+  degrees         String
+  experienceYears Int?
+  bio             String?
+  user            User     @relation(fields: [userId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PatientProfile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique @db.ObjectId
+  displayName String?
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ExercisePrescription {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId   String   @db.ObjectId
+  patientId  String   @db.ObjectId
+  exerciseId String
+  name       String?
+  gifUrl     String?
+  bodyPart   String?
+  target     String?
+  createdAt  DateTime @default(now())
+
+  doctor  User @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+  patient User @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  sessions ExerciseSessionRecord[]
+}
+
+model ExerciseSessionRecord {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  prescriptionId String   @db.ObjectId
+  doctorId       String   @db.ObjectId
+  patientId      String   @db.ObjectId
+  videoUrl       String
+  videoPublicId  String?
+  repCount       Int?
+  accuracy       Float?
+  maxAngle       Float?
+  reportText     String?
+  createdAt      DateTime @default(now())
+
+  prescription ExercisePrescription @relation(fields: [prescriptionId], references: [id])
+  doctor       User @relation("DoctorSessionRecords", fields: [doctorId], references: [id])
+  patient      User @relation("PatientSessionRecords", fields: [patientId], references: [id])
+}
+
+model DoctorSlot {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId  String     @db.ObjectId
+  startAt   DateTime
+  endAt     DateTime
+  status    SlotStatus @default(AVAILABLE)
+  createdAt DateTime   @default(now())
+
+  doctor      User         @relation("DoctorSlots", fields: [doctorId], references: [id])
+  appointment Appointment?
+}
+
+model Appointment {
+  id         String             @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId   String             @db.ObjectId
+  patientId  String             @db.ObjectId
+  slotId     String             @unique @db.ObjectId
+  roomId     String
+  meetingUrl String
+  status     AppointmentStatus  @default(SCHEDULED)
+  createdAt  DateTime           @default(now())
+
+  doctor   User       @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  patient  User       @relation("PatientAppointments", fields: [patientId], references: [id])
+  slot     DoctorSlot @relation(fields: [slotId], references: [id])
+}
