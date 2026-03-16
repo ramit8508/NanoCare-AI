@@ -16,3 +16,4 @@ nenocare-ai/yarn-error.log*
 
 # OS
 .DS_Store
+.env
